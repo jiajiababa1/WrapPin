@@ -1,0 +1,44 @@
+name: Build Standard IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          ls /Applications | grep -i '^Xcode' || true
+          NEWEST="$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -n 1 || true)"
+          if [ -n "${NEWEST}" ]; then
+            echo "Selecting ${NEWEST}"
+            sudo xcode-select -s "${NEWEST}"
+          fi
+          xcodebuild -version
+
+      - name: Package Standard IPA
+        run: |
+          export OUTPUT_DIR="${GITHUB_WORKSPACE}/dist"
+          mkdir -p "${OUTPUT_DIR}"
+          zsh scripts/package-ipa.sh standard
+
+      - name: Publish IPA as a release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IPA_PATH="$(ls dist/*.ipa | head -n 1)"
+          IPA_NAME="$(basename "${IPA_PATH}")"
+          TAG="ipa-${GITHUB_RUN_NUMBER}"
+          gh release create "${TAG}" "${IPA_PATH}" \
+            --title "${IPA_NAME}" \
+            --notes "Unsigned Standard IPA built by GitHub Actions from commit ${GITHUB_SHA}."
+          echo "Published ${IPA_NAME} under release tag ${TAG}"
