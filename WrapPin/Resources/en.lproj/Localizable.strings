@@ -74,6 +74,7 @@
 "Walking speed" = "Walking speed";
 "Constant route speed · 1–12 km/h" = "Constant route speed · 1–12 km/h";
 "%.1f km/h" = "%.1f km/h";
+"km/h" = "km/h";
 "Address unavailable · %@" = "Address unavailable · %@";
 "Copy coordinates" = "Copy coordinates";
 "Coordinates copied" = "Coordinates copied";

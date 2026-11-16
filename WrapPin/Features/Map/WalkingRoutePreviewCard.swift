@@ -20,6 +20,8 @@ struct WalkingRoutePreviewCard: View {
     let onDone: () -> Void
 
     @State private var isConfirmingStop = false
+    @State private var drivingSpeedInput = ""
+    @FocusState private var drivingSpeedInputFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -168,8 +170,20 @@ struct WalkingRoutePreviewCard: View {
                 Text("Simulated speed")
                     .font(.subheadline.weight(.medium))
                 Spacer()
-                Text(drivingSpeedText)
-                    .font(.subheadline.monospacedDigit().weight(.semibold))
+                HStack(spacing: 4) {
+                    TextField("Simulated driving speed", text: $drivingSpeedInput)
+                        .font(.subheadline.monospacedDigit().weight(.semibold))
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.numberPad)
+                        .focused($drivingSpeedInputFocused)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .frame(minWidth: 36)
+                        .accessibilityLabel("Simulated driving speed")
+                        .onSubmit(commitDrivingSpeedInput)
+                    Text("km/h")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
             }
             Slider(value: drivingSpeedBinding, in: 5...240, step: 1)
                 .accessibilityLabel("Simulated driving speed")
@@ -178,6 +192,29 @@ struct WalkingRoutePreviewCard: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .onAppear { syncDrivingSpeedInput() }
+        .onChange(of: simulation.drivingSpeedKilometresPerHour) { _, _ in
+            syncDrivingSpeedInput()
+        }
+        .onChange(of: drivingSpeedInputFocused) { _, isFocused in
+            if !isFocused {
+                commitDrivingSpeedInput()
+            }
+        }
+    }
+
+    private func syncDrivingSpeedInput() {
+        let current = String(Int(simulation.drivingSpeedKilometresPerHour.rounded()))
+        if drivingSpeedInput != current {
+            drivingSpeedInput = current
+        }
+    }
+
+    private func commitDrivingSpeedInput() {
+        if let value = Double(drivingSpeedInput.trimmingCharacters(in: .whitespaces)) {
+            simulation.drivingSpeedKilometresPerHour = min(max(value, 5), 240)
+        }
+        syncDrivingSpeedInput()
     }
 
     @ViewBuilder

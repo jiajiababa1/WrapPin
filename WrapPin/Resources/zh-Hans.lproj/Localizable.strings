@@ -354,6 +354,7 @@
 "Simulated driving speed" = "模拟驾车速度";
 "Constant route speed · 5–240 km/h" = "匀速沿路线移动 · 5–240 公里/小时";
 "%lld km/h" = "%lld 公里/小时";
+"km/h" = "公里/小时";
 "Travel time" = "预计用时";
 "Paused" = "已暂停";
 "Start Driving" = "开始模拟驾车";
